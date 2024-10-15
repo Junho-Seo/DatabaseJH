@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  {% comment %}
+  현재 유저모델은 comment, article과 1:N 관계, article과 M:N 관계
+  총 3개의 모델 관계가 형성되어 있으며 모두 역참조
+  {% endcomment %}
+  <h1>{{ person.username }}의 프로필</h1>
+  <div>
+    팔로잉 : {{ person.followings.all|length}} / 팔로워 : {{ person.followers.all|length }}
+  </div>
+  {% if request.user != person %}
+    <div>
+      <form action="{% url "accounts:follow" person.pk %}" method="POST">
+        {% csrf_token %}
+        {% if request.user in person.followers.all %}
+        <input type="submit" value="언팔로우">
+        {% else %}
+        <input type="submit" value="팔로우">
+        {% endif %}
+      </form>
+    </div>
+  {% endif %}
+  {% comment %} 유저가 작성한 게시글 (article과 1:N에서의 역참조) {% endcomment %}
+  <h2>{{ person.username }}가 작성한 게시글</h2>
+  {% for article in person.article_set.all %}
+    <p>{{ article }}</p>
+  {% endfor %}
+  {% comment %} 유저가 작성한 댓글 (comment와 1:N에서의 역참조) {% endcomment %}
+  <h2>{{ person.username }}가 작성한 댓글</h2>
+  {% for comment in person.comment_set.all %}
+  <p>{{ comment }}</p>
+  {% endfor %}
+  {% comment %} 유저가 좋아요한 게시글 (article과의 M:N에서의 역참조) {% endcomment %}
+  <h2>{{ person.username }}가 좋아요한 게시글</h2>
+  {% for like in person.like_articles.all %}
+  <p>{{ like }}</p>
+  {% endfor %}
+</body>
+</html>
